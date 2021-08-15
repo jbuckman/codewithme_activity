@@ -37,42 +37,44 @@ class task:
         self.dataset = get_examples(self.target_function, n)
 
 def interactive_plot(train_points=None, target_function=None):
-    def plotter(doc):
-        plot = figure(height=400, width=600, x_range=X_RANGE, y_range=[-6, 6])
-        vline = Span(location=0, dimension='height', line_color='black', line_width=2)
-        hline = Span(location=0, dimension='width', line_color='black', line_width=2)
-        plot.renderers.extend([vline, hline])
+    plot = figure(height=400, width=600, x_range=X_RANGE, y_range=[-6, 6])
+    vline = Span(location=0, dimension='height', line_color='black', line_width=2)
+    hline = Span(location=0, dimension='width', line_color='black', line_width=2)
+    plot.renderers.extend([vline, hline])
 
-        my_function_datasource = ColumnDataSource(data=dict(x=X_LINSPACE.tolist(), y=(0.*X_LINSPACE).tolist()))
-        mfl = plot.line('x', 'y', source=my_function_datasource, color='blue', line_width=3)
-        if train_points is not None:
-            x, y = zip(*train_points)
-            tpc = plot.circle(x, y, color='red', size=5)
-        if target_function is not None:
-            y = target_function(X_LINSPACE)
-            tfl = plot.line(X_LINSPACE.tolist(), y.tolist(), color='red', line_dash="dashed", line_width=3, line_alpha=0. if train_points is not None else 1.)
+    my_function_datasource = ColumnDataSource(data=dict(x=X_LINSPACE.tolist(), y=(0.*X_LINSPACE).tolist()))
+    mfl = plot.line('x', 'y', source=my_function_datasource, color='blue', line_width=3)
+    if train_points is not None:
+        x, y = zip(*train_points)
+        tpc = plot.circle(x, y, color='red', size=5)
+    if target_function is not None:
+        y = target_function(X_LINSPACE)
+        tfl = plot.line(X_LINSPACE.tolist(), y.tolist(), color='red', line_dash="dashed", line_width=3, line_alpha=0. if train_points is not None else 1.)
 
-        widgets = []
+    widgets = []
 
-        sliders = [Slider(value=0.0, start=-3.0, end=3.0, step=0.25) for _ in range(8)]
-        def update_data(attrname, old, new):
-            parameters = [s.value for s in sliders]
-            my_function = function_from_parameters(parameters)
-            my_function_datasource.data = dict(x=X_LINSPACE.tolist(), y=my_function(X_LINSPACE).tolist())
-        for s in sliders: s.on_change('value', update_data)
-        widgets += sliders
+    sliders = [Slider(value=0.0, start=-3.0, end=3.0, step=0.25) for _ in range(8)]
+    slider_callback = CustomJS(args=dict(mfds=my_function_datasource, **{f"s{i}" : slider for i, slider in enumerate(sliders)}), code="""
+       var data = mfds.data;
+       var x = data['x']
+       var y = data['y']
+       for (var i = 0; i < x.length; i++) {
+           y[i] = s0.value + s1.value * x[i] + s2.value * x[i]**2 + s3.value * x[i]**3 + s4.value * Math.sin(2**-1 * 2*Math.PI*x[i]) + s5.value * Math.sin(2**0 * 2*Math.PI*x[i]) + s6.value * Math.sin(2**1 * 2*Math.PI*x[i]) + s7.value * Math.sin(2**2 * 2*Math.PI*x[i]);
+       }
+       mfds.change.emit();
+    """)
+    for s in sliders: s.js_on_change('value', slider_callback)
+    widgets += sliders
 
-        if target_function is not None and train_points is not None:
-            target_toggle = Toggle(label="Reveal target function", active=False)
-            def update_target_visible(new):
-                if new == True: tfl.glyph.line_alpha = 1.; target_toggle.label = "Hide target function"
-                else:           tfl.glyph.line_alpha = 0.; target_toggle.label = "Reveal target function"
-            target_toggle.on_click(update_target_visible)
-            widgets += [target_toggle]
+    if target_function is not None and train_points is not None:
+        target_toggle = Toggle(label="Reveal target function", active=False)
+        toggle_callback = CustomJS(args=dict(tflg=tfl.glyph, tt=target_toggle), code="""
+            if (cb_obj.active == true) {tflg.line_alpha = 1.; tt.label = 'Hide target function'}
+            else                       {tflg.line_alpha = 0.; tt.label = 'Reveal target function'};""")
+        target_toggle.js_on_click(toggle_callback)
+        widgets += [target_toggle]
 
-        inputs = column(*widgets)
-        doc.add_root(row(inputs, plot))
-    return plotter
+    return row(column(*widgets), plot)
 
 def live_plot(train_points, my_function, target_function):
     plot = figure(height=400, width=600, x_range=X_RANGE, y_range=[-6, 6])
@@ -89,8 +91,7 @@ def live_plot(train_points, my_function, target_function):
     target_toggle = Toggle(label="Reveal target function", active=False)
     callback = CustomJS(args=dict(tflg=tfl.glyph, tt=target_toggle), code="""
         if (cb_obj.active == true) {tflg.line_alpha = 1.; tt.label = 'Hide target function'}
-        else                       {tflg.line_alpha = 0.; tt.label = 'Reveal target function'};
-    """)
+        else                       {tflg.line_alpha = 0.; tt.label = 'Reveal target function'};""")
     target_toggle.js_on_click(callback)
 
     widgets = sliders + [target_toggle]
