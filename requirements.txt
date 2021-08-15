@@ -1,2 +1,2 @@
 torch
-bokeh
+bokeh==2.2.0
