@@ -117,11 +117,11 @@ hard_target_4 = function_from_parameters([ 0.5000,  1.5000,  0.7500, -1.0000,  0
 
 
 easy_target_small_dataset  = task([0., 0., 0., 0.5, 0., 0., 0., 0.], 5)
-easy_target_medium_dataset = task([1., 0., -1., 0., 0., 0., 0., 0.], 25)
-easy_target_large_dataset  = task([-1., 0., 0., 0., 0., 1., 0., 0.], 1000)
+easy_target_medium_dataset = task([1., 0., -1., 0., 0., 0., 0., 0.], 20)
+easy_target_large_dataset  = task([-1., 0., 0., 0., 0., 1., 0., 0.], 100)
 medium_target_small_dataset  = task([0.5, -1., 0., 0., 0.5, 0., 0., 0.], 5)
-medium_target_medium_dataset = task([0., 0., 0., 0., -1., 0., 0., 1.], 25)
-medium_target_large_dataset  = task([2., 0., -1.5, 0., 0., 1., 1., 0.], 1000)
+medium_target_medium_dataset = task([0., 0., 0., 0., -1., 0., 0., 1.], 20)
+medium_target_large_dataset  = task([2., 0., -1.5, 0., 0., 1., 1., 0.], 100)
 hard_target_small_dataset  = task([-1.5000,  0.5000,  1.0000, -2.7500, -0.2500,  0.5000,  0.7500,  0.2500], 5)
-hard_target_medium_dataset = task([ 0.2500, -0.7500,  0.7500,  0.5000, -1.5000, -0.7500,  0.2500, -0.5000], 25)
-hard_target_large_dataset  = task([-0.2500,  0.0000, -0.5000, -0.5000,  0.0000, -0.2500, -0.2500, -0.5000], 1000)
+hard_target_medium_dataset = task([ 0.2500, -0.7500,  0.7500,  0.5000, -1.5000, -0.7500,  0.2500, -0.5000], 20)
+hard_target_large_dataset  = task([-0.2500,  0.0000, -0.5000, -0.5000,  0.0000, -0.2500, -0.2500, -0.5000], 100)
